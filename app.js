@@ -22,12 +22,21 @@ app.put("/users/:id", (req, res) => {
       const depositRes = bank.deposit(req.params.id, parseInt(req.body.amount));
       res.status(depositRes.status).send(depositRes.msg);
       break;
+
     case "withdraw":
       const withdrawRes = bank.withdraw(
         req.params.id,
         parseInt(req.body.amount)
       );
       res.status(withdrawRes.status).send(withdrawRes.msg);
+      break;
+
+    case "update credit":
+      const updateCreditRes = bank.updateCredit(
+        req.params.id,
+        parseInt(req.body.amount)
+      );
+      res.status(updateCreditRes.status).send(updateCreditRes.msg);
   }
 });
 

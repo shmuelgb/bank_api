@@ -29,7 +29,8 @@ const updateUser = (index, prop, value) => {
       break;
 
     case "cash":
-      if (data[index].cash + value < 0)
+      const balance = data[index].cash + data[index].credit;
+      if (balance + value < 0)
         response = {
           status: 400,
           msg: "not enough credit!",
@@ -41,10 +42,18 @@ const updateUser = (index, prop, value) => {
           msg: data[index],
         };
       }
-      saveData(data);
-      return response;
+      break;
+
+    case "credit":
+      data[index].credit = value;
+      response = {
+        status: 200,
+        msg: data[index],
+      };
+      break;
   }
-  return data;
+  saveData(data);
+  return response;
 };
 
 const addUser = (user) => {
@@ -79,4 +88,14 @@ const withdraw = (id, amount) => {
   } else return updateUser(index, "cash", -amount);
 };
 
-module.exports = { addUser, deposit, withdraw };
+const updateCredit = (id, amount) => {
+  const index = findUser(id);
+  if (index === -1) {
+    return {
+      status: 400,
+      msg: "User not found",
+    };
+  } else return updateUser(index, "credit", amount);
+};
+
+module.exports = { addUser, deposit, withdraw, updateCredit };
