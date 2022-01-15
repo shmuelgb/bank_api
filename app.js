@@ -10,10 +10,9 @@ app.post("/users", (req, res) => {
     cash: req.body.cash,
     credit: req.body.credit,
   };
-  const userAdded = bank.addUser(user);
+  const addUserRes = bank.addUser(user);
 
-  console.log(userAdded);
-  res.send(userAdded);
+  res.status(addUserRes.status).send(addUserRes.msg);
 });
 
 app.put("/users/:id", (req, res) => {
@@ -37,7 +36,28 @@ app.put("/users/:id", (req, res) => {
         parseInt(req.body.amount)
       );
       res.status(updateCreditRes.status).send(updateCreditRes.msg);
+      break;
+
+    case "transfer":
+      const transferRes = bank.transfer(
+        req.params.id,
+        req.body.to,
+        parseInt(req.body.amount)
+      );
+      res.status(transferRes.from.status).send({
+        from: transferRes.from.msg,
+        to: transferRes.to.msg,
+      });
+      break;
   }
+});
+
+app.get("/users", (req, res) => {
+  res.send(bank.getData());
+});
+
+app.get("/users/:id", (req, res) => {
+  res.send(bank.getUserDetails(req.params.id).msg);
 });
 
 const PORT = 3000;

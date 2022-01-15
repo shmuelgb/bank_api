@@ -56,16 +56,27 @@ const updateUser = (index, prop, value) => {
   return response;
 };
 
-const addUser = (user) => {
+const addUser = ({ id, name, cash, credit }) => {
   const data = getData();
-  const newUser = {
-    id: user.id,
-    name: user.name,
-    cash: user.cash ? user.cash : 0,
-    credit: user.credit ? user.credit : 0,
-  };
-  saveData([...data, newUser]);
-  return newUser;
+  const checkForDuplicates = findUser(id);
+  if (checkForDuplicates > -1)
+    return {
+      status: 400,
+      msg: "User already registered!",
+    };
+  else {
+    const newUser = {
+      id,
+      name,
+      cash: cash ? cash : 0,
+      credit: credit ? credit : 0,
+    };
+    saveData([...data, newUser]);
+    return {
+      status: 200,
+      msg: newUser,
+    };
+  }
 };
 
 const deposit = (id, amount) => {
@@ -98,4 +109,36 @@ const updateCredit = (id, amount) => {
   } else return updateUser(index, "credit", amount);
 };
 
-module.exports = { addUser, deposit, withdraw, updateCredit };
+const transfer = (idFrom, idTo, amount) => {
+  const indexFrom = findUser(idFrom);
+  const indexTo = findUser(idTo);
+  if (indexFrom === -1 || indexTo === -1)
+    return {
+      status: 400,
+      msg: "User not found",
+    };
+  else
+    return {
+      from: updateUser(indexFrom, "cash", -amount),
+      to: updateUser(indexTo, "cash", amount),
+    };
+};
+
+const getUserDetails = (id) => {
+  const index = findUser(id);
+  const data = getData();
+  return {
+    status: 200,
+    msg: data[index],
+  };
+};
+
+module.exports = {
+  getData,
+  addUser,
+  deposit,
+  withdraw,
+  updateCredit,
+  transfer,
+  getUserDetails,
+};
