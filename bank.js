@@ -22,17 +22,29 @@ const findUser = (id) => {
 
 const updateUser = (index, prop, value) => {
   const data = getData();
-  const newData = data.filter((user, i) => {
-    if (i !== index) return user;
-    else
-      return {
-        id: user.id,
-        name: prop === "name" ? value : user.name,
-        cash: prop === "cash" ? value : user.cash,
-        credit: prop === "credit" ? value : user.credit,
-      };
-  });
-  return newData;
+  let response;
+  switch (prop) {
+    case "name":
+      data[index] = value;
+      break;
+
+    case "cash":
+      if (data[index].cash + value < 0)
+        response = {
+          status: 400,
+          msg: "not enough credit!",
+        };
+      else {
+        data[index].cash += value;
+        response = {
+          status: 200,
+          msg: data[index],
+        };
+      }
+      saveData(data);
+      return response;
+  }
+  return data;
 };
 
 const addUser = (user) => {
@@ -54,11 +66,17 @@ const deposit = (id, amount) => {
       status: 400,
       msg: "User not found",
     };
-  } else {
-    const data = getData();
-    const usersUpdated = updateUser(index, "cash", amount);
-    saveData(usersUpdated);
-  }
+  } else return updateUser(index, "cash", amount);
 };
 
-module.exports = { addUser, deposit };
+const withdraw = (id, amount) => {
+  const index = findUser(id);
+  if (index === -1) {
+    return {
+      status: 400,
+      msg: "User not found",
+    };
+  } else return updateUser(index, "cash", -amount);
+};
+
+module.exports = { addUser, deposit, withdraw };
